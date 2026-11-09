@@ -35,14 +35,27 @@ function pentagrama(i, notas) {
 }
 const $ = id => document.getElementById(id); let ctx, parar = [], parpadeos = [];
 $('bpm').oninput = () => $('bv').textContent = $('bpm').value;
+// Piano de muestras (Salamander Grand Piano, A. Holm, CC-BY 3.0, vía tonejs.github.io): se usa la muestra más cercana y se ajusta el tono.
+const MUESTRAS = { A2: 45, C3: 48, Ds3: 51, Fs3: 54, A3: 57, C4: 60, Ds4: 63, Fs4: 66, A4: 69, C5: 72, Ds5: 75 }, buffers = {};
+async function cargar() {
+  await Promise.all(Object.keys(MUESTRAS).map(async n => {
+    if (buffers[n]) return;
+    try { buffers[n] = await ctx.decodeAudioData(await (await fetch(`piano/${n}.mp3`)).arrayBuffer()); } catch {}
+  }));
+}
 function nota(f, t, d, v) {
-  const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = f;
-  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(v * .4, t + d * .9); g.gain.linearRampToValueAtTime(0, t + d);
-  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + d + .05); parar.push(o);
+  const midi = 69 + 12 * Math.log2(f / 440);
+  let mejor = null; for (const n in buffers) if (!mejor || Math.abs(MUESTRAS[n] - midi) < Math.abs(MUESTRAS[mejor] - midi)) mejor = n;
+  const g = ctx.createGain(); g.connect(ctx.destination);
+  const o = mejor ? ctx.createBufferSource() : ctx.createOscillator();
+  if (mejor) { o.buffer = buffers[mejor]; o.playbackRate.value = 2 ** ((midi - MUESTRAS[mejor]) / 12); }
+  else { o.type = 'triangle'; o.frequency.value = f; }
+  g.gain.setValueAtTime(v * (mejor ? 2.2 : 1), t); g.gain.setValueAtTime(v * (mejor ? 2.2 : 1), t + d * .85); g.gain.linearRampToValueAtTime(0, t + d + .25);
+  o.connect(g); o.start(t); o.stop(t + d + .3); parar.push(o);
 }
 function parada() { parpadeos.forEach(clearTimeout); document.querySelectorAll('.cur').forEach(e => e.classList.remove('cur')); parar.forEach(o => { try { o.stop() } catch {} }); parar = []; $('nota').textContent = ''; }
-function tocar(txt, ej) {
-  parada(); ctx ??= new AudioContext(); ctx.resume();
+async function tocar(txt, ej) {
+  parada(); ctx ??= new AudioContext(); await ctx.resume(); await cargar();
   const tono = +$('tono').value, p = 60 / +$('bpm').value, f = s => 261.6256 * 2 ** ((s + tono) / 12);
   let t = ctx.currentTime + .2; [0, 4, 7].forEach(s => nota(f(s), t, 2 * p, .12)); t += 4 * p;
   parpadeos.forEach(clearTimeout); parpadeos = [];
