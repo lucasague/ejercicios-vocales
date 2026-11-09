@@ -10,6 +10,7 @@ svg{width:100%;background:#f4efe4;border-radius:8px;margin:6px 0}.cur{fill:#e886
 <label>Tono de salida (baja si se te hace agudo)</label>
 <select id="tono"><option value="-7">Fa2... Fa3 (muy grave)</option><option value="-5" selected>Sol3 (grave)</option><option value="-3">La3</option><option value="0">Do4 (como la partitura)</option><option value="2">Re4</option><option value="4">Mi4</option></select>
 <label>Velocidad: <span id="bv">72</span> pulsos/min</label><input id="bpm" type="range" min="40" max="140" value="72">
+<label>Volumen</label><input id="vol" type="range" min="1" max="10" step="0.5" value="5">
 <div id="nota"></div><div id="lista"></div>
 <script type="module">
 import { EJERCICIOS, parsear } from './ejercicios.js';
@@ -43,10 +44,17 @@ async function cargar() {
     try { buffers[n] = await ctx.decodeAudioData(await (await fetch(`piano/${n}.mp3`)).arrayBuffer()); } catch {}
   }));
 }
+// Salida maestra: volumen ajustable (por defecto alto) y un compresor para que no sature.
+let master;
+function salida() {
+  if (!master) { master = ctx.createGain(); const c = ctx.createDynamicsCompressor(); master.connect(c); c.connect(ctx.destination); }
+  master.gain.value = +$('vol').value; return master;
+}
+$('vol').oninput = () => { if (master) master.gain.value = +$('vol').value; };
 function nota(f, t, d, v) {
   const midi = 69 + 12 * Math.log2(f / 440);
   let mejor = null; for (const n in buffers) if (!mejor || Math.abs(MUESTRAS[n] - midi) < Math.abs(MUESTRAS[mejor] - midi)) mejor = n;
-  const g = ctx.createGain(); g.connect(ctx.destination);
+  const g = ctx.createGain(); g.connect(salida());
   const o = mejor ? ctx.createBufferSource() : ctx.createOscillator();
   if (mejor) { o.buffer = buffers[mejor]; o.playbackRate.value = 2 ** ((midi - MUESTRAS[mejor]) / 12); }
   else { o.type = 'triangle'; o.frequency.value = f; }
