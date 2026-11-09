@@ -15,11 +15,14 @@ export const EJERCICIOS = [
   ['11-cromatica', 'Cromática', "Do Di Re Ri Mi Fa Fi Sol Si La Li Ti Do':2 Do' Ti Tei La Lei Sol Sei Fa Mi Mei Re Ra Do:2"],
 ];
 const SEMI = { Do:0, Di:1, Ra:1, Re:2, Ri:3, Mei:3, Mi:4, Fa:5, Fi:6, Sei:6, Sol:7, Si:8, Lei:8, La:9, Li:10, Tei:10, Ti:11 };
+// Para el pentagrama: letra (0 Do..6 Si), alteración (+1 sostenido, -1 bemol) y octava relativa a Do4.
+const GRADO = { Do:[0,0], Di:[0,1], Ra:[1,-1], Re:[1,0], Ri:[1,1], Mei:[2,-1], Mi:[2,0], Fa:[3,0], Fi:[3,1], Sei:[4,-1], Sol:[4,0], Si:[4,1], Lei:[5,-1], La:[5,0], Li:[5,1], Tei:[6,-1], Ti:[6,0] };
 export function parsear(txt) {
   return txt.trim().split(/\s+/).map(t => {
     const m = /^([A-Za-z]+)([,']*)(?::(\d+))?$/.exec(t);
     if (!m || !(m[1] in SEMI)) throw new Error('sílaba desconocida: ' + t);
     const oct = [...m[2]].reduce((a, c) => a + (c === "'" ? 12 : -12), 0);
-    return { silaba: m[1], semis: SEMI[m[1]] + oct, pulsos: m[3] ? +m[3] : 1 };
+    const [letra, alt] = GRADO[m[1]];
+    return { silaba: m[1], semis: SEMI[m[1]] + oct, pulsos: m[3] ? +m[3] : 1, pos: letra + 7 * (oct / 12), alt };
   });
 }
