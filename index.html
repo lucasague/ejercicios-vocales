@@ -11,7 +11,7 @@ svg{width:100%;background:#f4efe4;border-radius:8px;margin:6px 0}.cur{fill:#e886
 <select id="tono"><option value="-7">Fa2... Fa3 (muy grave)</option><option value="-5" selected>Sol3 (grave)</option><option value="-3">La3</option><option value="0">Do4 (como la partitura)</option><option value="2">Re4</option><option value="4">Mi4</option></select>
 <label>Velocidad: <span id="bv">72</span> pulsos/min</label><input id="bpm" type="range" min="40" max="140" value="72">
 <label>Volumen</label><input id="vol" type="range" min="1" max="10" step="0.5" value="5">
-<div id="nota"></div><div id="lista"></div>
+<label style="display:flex;gap:8px;align-items:center;color:#eee"><input id="bucle" type="checkbox" checked style="width:auto"> Repetir en bucle hasta que pares (■)</label><div id="nota"></div><div id="lista"></div>
 <script type="module">
 import { EJERCICIOS, parsear } from './ejercicios.js';
 const SVGNS = 'http://www.w3.org/2000/svg';
@@ -64,10 +64,13 @@ function nota(f, t, d, v) {
 function parada() { parpadeos.forEach(clearTimeout); document.querySelectorAll('.cur').forEach(e => e.classList.remove('cur')); parar.forEach(o => { try { o.stop() } catch {} }); parar = []; $('nota').textContent = ''; }
 async function tocar(txt, ej) {
   parada(); ctx ??= new AudioContext(); await ctx.resume(); await cargar();
+  pasada(txt, ej, true);
+}
+// Una pasada del ejercicio (con acorde y cuenta solo la primera vez); si el bucle está activo, encadena otra hasta que se pare.
+function pasada(txt, ej, primera) {
   const tono = +$('tono').value, p = 60 / +$('bpm').value, f = s => 261.6256 * 2 ** ((s + tono) / 12);
-  let t = ctx.currentTime + .2; [0, 4, 7].forEach(s => nota(f(s), t, 2 * p, .12)); t += 4 * p;
-  parpadeos.forEach(clearTimeout); parpadeos = [];
-  document.querySelectorAll('.cur').forEach(e => e.classList.remove('cur'));
+  let t = ctx.currentTime + .2;
+  if (primera) { [0, 4, 7].forEach(s => nota(f(s), t, 2 * p, .12)); t += 4 * p; } else t += p;
   parsear(txt).forEach((n, k) => {
     nota(f(n.semis), t, n.pulsos * p * .95, .35);
     parpadeos.push(setTimeout(() => {
@@ -75,7 +78,8 @@ async function tocar(txt, ej) {
       $('nota').textContent = n.silaba; const e = $(`n${ej}_${k}`); e.classList.add('cur'); e.scrollIntoView({ block: 'nearest' });
     }, (t - ctx.currentTime) * 1000)); t += n.pulsos * p;
   });
-  parpadeos.push(setTimeout(parada, (t - ctx.currentTime) * 1000));
+  const hasta = (t - ctx.currentTime) * 1000;
+  parpadeos.push(setTimeout(() => { parpadeos = []; $('bucle').checked ? pasada(txt, ej, false) : parada(); }, hasta));
 }
 $('lista').innerHTML = EJERCICIOS.map(([id, nom, txt], i) => `<div class="ej"><b>${nom}</b><div class="pent" id="p${i}"></div><button data-i="${i}">▶ Tocar</button> <button class="stop">■</button></div>`).join('');
 EJERCICIOS.forEach(([, , txt], i) => $('p' + i).innerHTML = pentagrama(i, parsear(txt)));
