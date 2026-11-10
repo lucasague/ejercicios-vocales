@@ -42,7 +42,7 @@ function pentagrama(i, notas) {
 const CALENTAMIENTO = [['Lip Trill (hombre)', 'calentamiento/lip-trill-hombre.mp3'], ['Glissando', 'calentamiento/glissando.mp3'], ['Trumpet Head Scale', 'calentamiento/trumpet-head-scale.mp3'], ['Humming (hombre)', 'calentamiento/humming-hombre.mp3'], ['Tongue Trill (hombre)', 'calentamiento/tongue-trill-hombre.mp3']];
 document.getElementById('calent').innerHTML = CALENTAMIENTO.map(([nom, src]) => `<div class="ej"><b>${nom}</b><audio controls preload="none" src="${src}" style="width:100%;margin-top:6px"></audio></div>`).join('');
 // Técnica vocal: audios de Juan (carpeta tecnica/); para añadir uno, una línea aquí y el mp3 en la carpeta.
-const TECNICA = [['Resonador de pecho (hombre)', 'tecnica/resonador-pecho-hombre.mp3'], ['Resonador de nariz (hombre)', 'tecnica/resonador-nariz-hombre.mp3']];
+const TECNICA = [['Resonador de pecho (hombre)', 'tecnica/resonador-pecho-hombre.mp3'], ['Resonador de nariz (hombre)', 'tecnica/resonador-nariz-hombre.mp3'], ['Resonador de cabeza (hombre)', 'tecnica/resonador-cabeza-hombre.mp3']];
 document.getElementById('tecnica').innerHTML = TECNICA.map(([nom, src]) => `<div class="ej"><b>${nom}</b><audio controls preload="none" src="${src}" style="width:100%;margin-top:6px"></audio></div>`).join('');
 document.getElementById('tabs').onclick = e => { const t = e.target.dataset.t; if (!t) return; parada(); document.querySelectorAll('audio').forEach(a => a.pause()); for (const b of document.querySelectorAll('.tab')) b.classList.toggle('on', b.dataset.t === t); for (const x of document.querySelectorAll('section[id^="t-"]')) x.hidden = x.id !== 't-' + t; };
 const $ = id => document.getElementById(id); let ctx, parar = [], parpadeos = [];
