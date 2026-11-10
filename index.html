@@ -8,7 +8,7 @@ svg{width:100%;background:#f4efe4;border-radius:8px;margin:6px 0}.cur{fill:#e886
 <h1>Ejercicios vocales</h1>
 <nav id="tabs" style="display:flex;gap:8px;margin:10px 0"><button data-t="calent" class="tab on">Calentamiento</button><button data-t="afina" class="tab">Afinación, escalas</button><button data-t="tecnica" class="tab">Técnica vocal</button></nav>
 <section id="t-calent"><div id="calent"></div></section>
-<section id="t-tecnica" hidden><p style="color:#aaa;font-size:.9rem">Ejercicios de técnica vocal (próximamente).</p><div id="tecnica"></div></section>
+<section id="t-tecnica" hidden><div id="tecnica"></div></section>
 <section id="t-afina" hidden><p style="color:#aaa;font-size:.9rem">Master Class «Afina tu voz». Suena primero un acorde con tu nota de salida (Do), cuenta 4 pulsos y empieza el ejercicio.</p>
 <label>Tono de salida (baja si se te hace agudo)</label>
 <select id="tono"><option value="-7">Fa2... Fa3 (muy grave)</option><option value="-5" selected>Sol3 (grave)</option><option value="-3">La3</option><option value="0">Do4 (como la partitura)</option><option value="2">Re4</option><option value="4">Mi4</option></select>
@@ -41,6 +41,9 @@ function pentagrama(i, notas) {
 // Calentamiento: audios de Juan (carpeta calentamiento/); para añadir uno, una línea aquí y el mp3 en la carpeta.
 const CALENTAMIENTO = [['Lip Trill (hombre)', 'calentamiento/lip-trill-hombre.mp3'], ['Glissando', 'calentamiento/glissando.mp3'], ['Trumpet Head Scale', 'calentamiento/trumpet-head-scale.mp3'], ['Humming (hombre)', 'calentamiento/humming-hombre.mp3'], ['Tongue Trill (hombre)', 'calentamiento/tongue-trill-hombre.mp3']];
 document.getElementById('calent').innerHTML = CALENTAMIENTO.map(([nom, src]) => `<div class="ej"><b>${nom}</b><audio controls preload="none" src="${src}" style="width:100%;margin-top:6px"></audio></div>`).join('');
+// Técnica vocal: audios de Juan (carpeta tecnica/); para añadir uno, una línea aquí y el mp3 en la carpeta.
+const TECNICA = [['Resonador de pecho (hombre)', 'tecnica/resonador-pecho-hombre.mp3'], ['Resonador de nariz (hombre)', 'tecnica/resonador-nariz-hombre.mp3']];
+document.getElementById('tecnica').innerHTML = TECNICA.map(([nom, src]) => `<div class="ej"><b>${nom}</b><audio controls preload="none" src="${src}" style="width:100%;margin-top:6px"></audio></div>`).join('');
 document.getElementById('tabs').onclick = e => { const t = e.target.dataset.t; if (!t) return; parada(); document.querySelectorAll('audio').forEach(a => a.pause()); for (const b of document.querySelectorAll('.tab')) b.classList.toggle('on', b.dataset.t === t); for (const x of document.querySelectorAll('section[id^="t-"]')) x.hidden = x.id !== 't-' + t; };
 const $ = id => document.getElementById(id); let ctx, parar = [], parpadeos = [];
 $('bpm').oninput = () => $('bv').textContent = $('bpm').value;
