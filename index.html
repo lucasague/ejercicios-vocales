@@ -38,7 +38,7 @@ function pentagrama(i, notas) {
   return s + '</svg>';
 }
 // Calentamiento: audios de Juan (carpeta calentamiento/); para añadir uno, una línea aquí y el mp3 en la carpeta.
-const CALENTAMIENTO = [['Lip Trill (hombre)', 'calentamiento/lip-trill-hombre.mp3'], ['Glissando', 'calentamiento/glissando.mp3'], ['Trumpet Head Scale', 'calentamiento/trumpet-head-scale.mp3']];
+const CALENTAMIENTO = [['Lip Trill (hombre)', 'calentamiento/lip-trill-hombre.mp3'], ['Glissando', 'calentamiento/glissando.mp3'], ['Trumpet Head Scale', 'calentamiento/trumpet-head-scale.mp3'], ['Humming (hombre)', 'calentamiento/humming-hombre.mp3'], ['Tongue Trill (hombre)', 'calentamiento/tongue-trill-hombre.mp3']];
 document.getElementById('calent').innerHTML = CALENTAMIENTO.map(([nom, src]) => `<div class="ej"><b>${nom}</b><audio controls preload="none" src="${src}" style="width:100%;margin-top:6px"></audio></div>`).join('');
 document.getElementById('tabs').onclick = e => { const t = e.target.dataset.t; if (!t) return; parada(); document.querySelectorAll('audio').forEach(a => a.pause()); for (const b of document.querySelectorAll('.tab')) b.classList.toggle('on', b.dataset.t === t); document.getElementById('t-calent').hidden = t !== 'calent'; document.getElementById('t-afina').hidden = t !== 'afina'; };
 const $ = id => document.getElementById(id); let ctx, parar = [], parpadeos = [];
